@@ -72,3 +72,13 @@ String formattedDate;
 int isWaitingForOta = 0; 
 const char* BROKER_MQTT = "broker.hivemq.com"; 
 int BROKER_PORT = 1883;
+// Motor A
+int motor1Pin1 = 27; 
+int motor1Pin2 = 26; 
+int enable1Pin = 14; 
+
+// Setting PWM properties
+const int freq = 30000;
+const int pwmChannel = 0;
+const int resolution = 8;
+int dutyCycle = 200;
