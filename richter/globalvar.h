@@ -70,15 +70,21 @@ char* test_root_ca= \
 /*Variáveis*/
 String formattedDate; 
 int isWaitingForOta = 0; 
+int estado = 0;
+String input;
 const char* BROKER_MQTT = "broker.hivemq.com"; 
 int BROKER_PORT = 1883;
-// Motor A
-int motor1Pin1 = 27; 
-int motor1Pin2 = 26; 
+// Motor A AND B
+int motor1Pin1Left = 27; 
+int motor1Pin2Left = 26; 
+int motor2Pin1Right = 29; 
+int motor2Pin2Right = 28; 
 int enable1Pin = 14; 
+int enable2Pin = 15;
+int timeoutHorario = 0;
 
 // Setting PWM properties
 const int freq = 30000;
 const int pwmChannel = 0;
+const int pwmChannel2 = 1;
 const int resolution = 8;
-int dutyCycle = 200;

@@ -24,7 +24,7 @@
 #include <Ultrasonic.h>
 #include "esp_wpa2.h"
 
-/*Declaração*/
+/*Declaration*/
 WiFiClientSecure client2; //Inicializar cliente wifi
 WiFiUDP ntpUDP; //NTP-UDP
 NTPClient timeClient(ntpUDP);//Cliente NTP
@@ -44,6 +44,15 @@ void init_mqtt(void);
 void reconnect_wifi(void); 
 void mqtt_callback(char* topic, byte* payload, unsigned int length);
 void verifica_conexoes_wifi_mqtt(void);
+void RightMotorPWM(String action, int dutyCycle, int delayTime);
+void RightMotorBinary(String action);
+void LeftMotorPWM(String action, int dutyCycle, int delayTime);
+void LefttMotorBinary(String action);
+int getDistanceBack();
+int getDistanceFront();
+int getDistanceLeft();
+int getDistanceRight();
+
 
 
  
@@ -55,8 +64,8 @@ void init_serial()
 void init_wifi(void) 
 {
     delay(10);
-    Serial.println("------Conexao WI-FI------");
-    Serial.print("Conectando-se na rede: ");
+    Serial.println("------Conection WI-FI------");
+    Serial.print("Trying to connect with: ");
     reconnect_wifi();
 }
   
@@ -69,14 +78,12 @@ void init_mqtt(void)
 void mqtt_callback(char* topic, byte* payload, unsigned int length) 
 {
     String msg;
- 
-    //obtem a string do payload recebido
     for(int i = 0; i < length; i++) 
     {
        char c = (char)payload[i];
        msg += c;
     }
-    Serial.print("[MQTT] Mensagem recebida: ");
+    Serial.print("[MQTT] Received message: ");
     Serial.println(msg);     
 }
   
@@ -84,17 +91,17 @@ void reconnect_mqtt(void)
 {
     while (!MQTT.connected()) 
     {
-        Serial.print("* Tentando se conectar ao Broker MQTT: ");
+        Serial.print("Trying to connect with broker ");
         Serial.println(BROKER_MQTT);
         if (MQTT.connect(ID_MQTT)) 
         {
-            Serial.println("Conectado com sucesso ao broker MQTT!");
+            Serial.println("Connected successfully with broker!");
             MQTT.subscribe(TOPICO_SUBSCRIBE); 
         } 
         else
         {
-            Serial.println("Falha ao reconectar no broker.");
-            Serial.println("Havera nova tentatica de conexao em 2s");
+            Serial.println("Failed to connect on broker.");
+            Serial.println("There will be a new attempt in 2 seconds.");
             delay(2000);
         }
     }
@@ -114,17 +121,17 @@ void reconnect_wifi()
     WiFi.setAutoConnect(true);
     wifiManager.setTimeout(80);
     wifiManager.setBreakAfterConfig(true);
-    wifiManager.setConfigPortalTimeout(80);
+    wifiManager.setConfigPortalTimeout(180);
   
     if (!wifiManager.autoConnect("Richter", "12345678")) {
-      Serial.println("Falhou para se conectar... Reiniciando.");
+      Serial.println("Failed to connect. Restarting...");
       delay(100);
       if (isWaitingForOta == 0) {
         ESP.restart();
       }
     }
     Serial.println();
-    Serial.print("Conectado com sucesso na rede ");
+    Serial.print("Connected.");
 
 }
 
