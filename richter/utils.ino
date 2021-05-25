@@ -1,4 +1,16 @@
 
+/*Configure all pins.*/
+void configurePins(){
+  pinMode(motor1Pin1Left, OUTPUT);
+  pinMode(motor1Pin2Left, OUTPUT);
+  pinMode(enable1Pin, OUTPUT);
+  pinMode(motor2Pin1Right, OUTPUT);
+  pinMode(motor2Pin2Right, OUTPUT);
+  pinMode(enable2Pin, OUTPUT);
+}
+
+
+/*Tasks - LED*/
 void vLowLED(void *pvParameters) {
   const int freq = 5000;
   const int ledChannel = 0;

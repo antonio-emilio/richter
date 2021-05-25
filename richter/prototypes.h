@@ -31,7 +31,6 @@ NTPClient timeClient(ntpUDP);//Cliente NTP
 secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
 WiFiClient espClient;
 PubSubClient MQTT(espClient);
-
 TaskHandle_t task_low_serial;
 TaskHandle_t task_low_led;
 TaskHandle_t task_low;
@@ -55,26 +54,37 @@ int getDistanceRight();
 
 
 
- 
+/*
+Init the serial communication.
+*/ 
 void init_serial() 
 {
     Serial.begin(115200);
 }
- 
+
+/*
+Init the wifi.
+*/ 
 void init_wifi(void) 
 {
     delay(10);
-    Serial.println("------Conection WI-FI------");
     Serial.print("Trying to connect with: ");
     reconnect_wifi();
 }
-  
+
+/*
+Init the mqtt connection.
+*/  
 void init_mqtt(void) 
 {
     MQTT.setServer(BROKER_MQTT, BROKER_PORT); 
     MQTT.setCallback(mqtt_callback);            
 }
-  
+
+
+/*
+If receives any message on mqtt, executes this function.
+*/  
 void mqtt_callback(char* topic, byte* payload, unsigned int length) 
 {
     String msg;
@@ -86,7 +96,10 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
     Serial.print("[MQTT] Received message: ");
     Serial.println(msg);     
 }
-  
+
+/*
+Check if mqtt connection is ok. If not, try to reconnect.
+*/  
 void reconnect_mqtt(void) 
 {
     while (!MQTT.connected()) 
@@ -106,7 +119,10 @@ void reconnect_mqtt(void)
         }
     }
 }
-  
+
+/*
+Check if wifi connection is ok. If not, try to reconnect.
+*/  
 void reconnect_wifi() 
 {
     if (WiFi.status() == WL_CONNECTED)
@@ -135,6 +151,9 @@ void reconnect_wifi()
 
 }
 
+/*
+Check all connections.
+*/
 void verifica_conexoes_wifi_mqtt(void)
 {
     reconnect_wifi(); 

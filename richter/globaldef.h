@@ -14,3 +14,5 @@
 #define PORTA_ECHO3      14
 #define PORTA_TRIGGER4   4
 #define PORTA_ECHO4      5
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  18000        /* Time ESP32 will go to sleep (in seconds) */
