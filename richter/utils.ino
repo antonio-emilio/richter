@@ -46,8 +46,6 @@ void vLowLED(void *pvParameters) {
 
 /*Tasks*/
 void vLowSerial(void *pvParameters) {
-  /*Iniciando o watchdog*/
-
   while (true) {
     if (Serial.available()) {
       input = Serial.readStringUntil('\n');
@@ -64,14 +62,14 @@ void vLowSerial(void *pvParameters) {
     
 }
 
-/*Função para obter horario atual*/
-void getCurrentTime(){
+/*Get actual time.*/
+String getCurrentTime(){
   timeoutHorario = 60;
-  Serial.println("Obtendo horário atual.");
-  timeClient.begin(); //Inicia cliente para obter horário.
-  timeClient.setTimeOffset(-10800); //Fuso horário.
+  Serial.println("Getting actual date");
+  timeClient.begin();
+  timeClient.setTimeOffset(-10800); 
   while (!timeClient.update()) {
-    timeClient.forceUpdate(); //Atualiza o horário.
+    timeClient.forceUpdate();
     delay(100);
     timeoutHorario--;
     if (timeoutHorario == 0) {
@@ -79,12 +77,11 @@ void getCurrentTime(){
     }
   }
 
-  formattedDate = "Horário de detecção: ";
-  formattedDate += timeClient.getFormattedDate(); //Obtem o horário formatado.
+  formattedDate = timeClient.getFormattedDate(); 
   if (timeoutHorario == 0) {
-    Serial.println("Não foi possível obter o horário.");
-    formattedDate = "Não foi possível obter o horário.";
+    Serial.println("Wasn't possible to get actual date.");
+    return;
   } else {
-    Serial.println("Horário obtido com sucesso.");
+    Serial.println("Date acquired successfully.");
   }
 }

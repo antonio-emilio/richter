@@ -42,6 +42,9 @@ void loop()
   verifica_conexoes_wifi_mqtt();
   MQTT.loop();
 
+  /*Evaluate the perimeter and check for too close objects.*/
+  checkPerimeter();
+
   /*Check if richter is charging. If true, goes to sleep.*/
   if(isCharging){
     esp_deep_sleep_start();

@@ -83,6 +83,10 @@ int motor2Pin2Right = 28;
 int enable1Pin = 14; 
 int enable2Pin = 15;
 int timeoutHorario = 0;
+int avoidBack = 0;
+int avoidFront = 0;
+int avoidRight = 0;
+int avoidLeft = 0;
 
 /*Sleep mode*/
 int isCharging = 0;

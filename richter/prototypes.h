@@ -51,6 +51,7 @@ int getDistanceBack();
 int getDistanceFront();
 int getDistanceLeft();
 int getDistanceRight();
+void checkPerimeter();
 
 
 

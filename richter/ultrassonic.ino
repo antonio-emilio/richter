@@ -55,3 +55,23 @@ int getDistanceBack()
     return distanciaCM;
 
 }
+
+/*Verify all sensors*/
+void checkPerimeter(){
+  int distanceBack = getDistanceBack();
+  int distanceFront = getDistanceFront();
+  int distanceRight = getDistanceRight();
+  int distanceLeft = getDistanceLeft();
+
+  if (distanceBack < 20)
+    avoidBack = 1;
+
+  if (distanceFront < 20)
+    avoidFront = 1;
+
+  if (distanceRight < 20)
+    avoidRight = 1;
+
+  if (distanceLeft < 20)
+    avoidLeft = 1;
+}
