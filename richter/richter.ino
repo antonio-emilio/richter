@@ -16,6 +16,13 @@ void setup()
 
   /*Configure all pins as input, output...*/
   configurePins();
+
+  /*Configure SPI*/
+  SPI.begin(18, 19, 23, SS); 
+
+  /*Configure I2C*/
+  Wire.begin(); 
+  i2cdetect();       
   
   /*Configure LED PWM functionalitites*/
   ledcSetup(pwmChannel, freq, resolution);

@@ -20,6 +20,9 @@
 #define PORTA_ECHO4      5
 #define pinRecharge      4
 
+/*SPI*/
+#define SPISPEED 8000000 
+
 /*DeepSleep*/
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
 #define TIME_TO_SLEEP  18000        /* Time ESP32 will go to sleep (in seconds) */
