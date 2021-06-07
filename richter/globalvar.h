@@ -88,8 +88,17 @@ struct_message myData;
 /*General variables*/
 int id = 0;
 
+/*FIRMWARE VERSION*/
+int V_FIRMWARE = 0;
+
+/*Intervals*/
+uint32_t lastCheck = 0;
+
 /*Default Commands*/
 String RECHARGING = "{\"id\":" + String(id) + ",\"cmd\":\"RECHARGING\"}";
+
+/*Over the Air Update*/
+bool updatedNeeded = false;
 
 /*Motor A AND B*/
 int motor1Pin1Left = 27; 

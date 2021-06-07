@@ -20,6 +20,9 @@
 #define PORTA_ECHO4      5
 #define pinRecharge      4
 
+/*Intervals*/
+#define checkInterval 600000
+
 /*SPI*/
 #define SPISPEED 8000000 
 
