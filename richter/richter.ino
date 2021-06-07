@@ -1,7 +1,18 @@
 #include "prototypes.h"
 
+/*Interrupt of recharging*/
+void IRAM_ATTR rechargebleISR()
+{
+  isCharging = 1;
+}
+
 void setup() 
 {
+  /*Init non vollatile memory*/
+  NVS.begin(); 
+
+  /*Get values from NVS*/  
+  getValuesFromNVS();
 
   /*Configure all pins as input, output...*/
   configurePins();
@@ -30,6 +41,18 @@ void setup()
   /*Init MQTT*/
   init_mqtt();
 
+  /*Init ESP-NOW*/
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+
+  /*Make all configs to use ESP-NOW*/
+  configESPNOW();
+
+  /*Interrupts*/
+  attachInterrupt(pinRecharge, rechargebleISR, RISING); 
+
   /*Publish a topic to tell he's alive.*/
   MQTT.publish(TOPICO_PUBLISH, "Richter has been initialized successfully.");
   Serial.println("Richter has been initialized successfully.");
@@ -47,6 +70,7 @@ void loop()
 
   /*Check if richter is charging. If true, goes to sleep.*/
   if(isCharging){
+    sendMessageESPNOW(RECHARGING, true);
     esp_deep_sleep_start();
   }
 

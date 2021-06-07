@@ -75,6 +75,22 @@ String input;
 const char* BROKER_MQTT = "broker.hivemq.com"; /*CONFIGURE YOUR BROKER*/
 int BROKER_PORT = 1883;
 
+/*ESP-NOW*/
+uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+typedef struct struct_message {
+  String cmd;
+  bool isBatteryLow;
+} struct_message;
+
+struct_message myData;
+
+/*General variables*/
+int id = 0;
+
+/*Default Commands*/
+String RECHARGING = "{\"id\":" + String(id) + ",\"cmd\":\"RECHARGING\"}";
+
 /*Motor A AND B*/
 int motor1Pin1Left = 27; 
 int motor1Pin2Left = 26; 
@@ -87,6 +103,8 @@ int avoidBack = 0;
 int avoidFront = 0;
 int avoidRight = 0;
 int avoidLeft = 0;
+
+
 
 /*Sleep mode*/
 int isCharging = 0;
