@@ -9,30 +9,6 @@ void configurePins(){
   pinMode(enable2Pin, OUTPUT);
 }
 
-/*ESP-NOW*/
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  Serial.print("Last Packet Send Status:");
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-}
-
-int configESPNOW(){
-  esp_now_register_send_cb(OnDataSent);
-  
-  /*Register peer*/
-  esp_now_peer_info_t peerInfo;
-  memcpy(peerInfo.peer_addr, broadcastAddress, 6);
-  peerInfo.channel = 0;  
-  peerInfo.encrypt = false;
-
-  /*Add peer*/
-  if (esp_now_add_peer(&peerInfo) != ESP_OK){
-    Serial.println("Failed to add peer");
-    return 0;
-  }
-
-  return 1;
-}
-
 /*Values from NVS*/
 void getValuesFromNVS(){
 

@@ -82,6 +82,7 @@ typedef struct struct_message {
   String cmd;
   bool isBatteryLow;
 } struct_message;
+int sender = 0;
 
 struct_message myData;
 
