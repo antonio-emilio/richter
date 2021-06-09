@@ -48,12 +48,18 @@ void setup()
   /*Init wifi*/
   init_wifi();
 
+  /*Starts socket connection*/
+  if (!client.connect("yourServer", 1883)) {
+    Serial.println("Socket connection has failed.");
+    return;
+  }
+
   /*Init MQTT*/
   init_mqtt();
   
   /*Init ESP-NOW*/
   if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
+    socketPrint("Error initializing ESP-NOW");
     return;
   }
 
@@ -65,7 +71,7 @@ void setup()
 
   /*Publish a topic to tell he's alive.*/
   MQTT.publish(TOPICO_PUBLISH, "Richter has been initialized successfully.");
-  Serial.println("Richter has been initialized successfully.");
+  socketPrint("Richter has been initialized successfully.");
   
 }
 

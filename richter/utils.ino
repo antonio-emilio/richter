@@ -11,9 +11,15 @@ void configurePins(){
 
 /*Values from NVS*/
 void getValuesFromNVS(){
-
   id = NVS.getInt("id");  /*Unique identifies of the robot*/
-  
+}
+
+/*Socket - Serial*/
+void socketPrint(String cmd){
+  if(debugSocket)
+    client.print(cmd);
+  else 
+    Serial.println(cmd);
 }
 
 /*Tasks - LED*/

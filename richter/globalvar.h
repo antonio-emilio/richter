@@ -88,6 +88,7 @@ struct_message myData;
 
 /*General variables*/
 int id = 0;
+int debugSocket = 0;
 
 /*FIRMWARE VERSION*/
 int V_FIRMWARE = 0;

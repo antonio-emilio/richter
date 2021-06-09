@@ -45,6 +45,9 @@ secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
 /*richter.ino*/
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
+/*WiFi*/
+WiFiClient client; 
+
 /*prototypes.ino*/
 void init_serial(void);
 void init_wifi(void);
