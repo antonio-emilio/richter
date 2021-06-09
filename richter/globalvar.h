@@ -118,6 +118,10 @@ int avoidLeft = 0;
 /*Sleep mode*/
 int isCharging = 0;
 
+/*PID*/
+double Setpoint, Input, Output;
+double Kp=2, Ki=5, Kd=1;
+
 /*PWM propeties*/
 const int freq = 30000;
 const int pwmChannel = 0;

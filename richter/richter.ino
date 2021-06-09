@@ -42,6 +42,9 @@ void setup()
   xTaskCreate(vLowSerial, "vLowSerial", 10000, NULL, 0, &task_low_serial);
   xTaskCreate(vLowLED, "vLowLED", 10000, NULL, 0, &task_low_led);
 
+  /*Configure PID functionalities*/
+  myPID.SetMode(AUTOMATIC);
+
   /*Init wifi*/
   init_wifi();
 
@@ -80,6 +83,9 @@ void loop()
 
   /*Evaluate the perimeter and check for too close objects.*/
   checkPerimeter();
+
+  /*Calculate the PID.*/
+  myPID.Compute();
 
   /*Check if richter is charging. If true, goes to sleep.*/
   if(isCharging){

@@ -22,6 +22,7 @@
 #include "globalvar.h"
 #include "globaldef.h"
 #include <Ultrasonic.h>
+#include <PID_v1.h>
 #include "esp_wpa2.h"
 
 /*Declaration*/
@@ -40,6 +41,9 @@ void vLow(void *pvParameters);
 void vLowSerial(void *pvParameters);
 void vLowLED(void *pvParameters);
 secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
+
+/*richter.ino*/
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 /*prototypes.ino*/
 void init_serial(void);
