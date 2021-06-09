@@ -25,20 +25,21 @@
 #include "esp_wpa2.h"
 
 /*Declaration*/
-WiFiClientSecure client2; //Inicializar cliente wifi
-WiFiUDP ntpUDP; //NTP-UDP
-NTPClient timeClient(ntpUDP);//Cliente NTP
-secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
+WiFiClientSecure client2; 
+WiFiUDP ntpUDP; 
+NTPClient timeClient(ntpUDP);
 WiFiClient espClient;
 PubSubClient MQTT(espClient);
 TaskHandle_t task_low_serial;
 TaskHandle_t task_low_led;
 TaskHandle_t task_low;
 
+
 /*utils.ino*/
 void vLow(void *pvParameters);
 void vLowSerial(void *pvParameters);
 void vLowLED(void *pvParameters);
+secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
 
 /*prototypes.ino*/
 void init_serial(void);

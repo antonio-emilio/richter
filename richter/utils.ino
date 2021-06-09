@@ -56,6 +56,7 @@ void vLowLED(void *pvParameters) {
   
   while (true) {
     esp_task_wdt_reset();
+    /*Oscilates the led.*/
     if (estado == WORKING){
       for(int i = 0; i< 255; i++){
         ledcWrite(ledChannel, i);
@@ -90,6 +91,21 @@ void vLowSerial(void *pvParameters) {
       
     }vTaskDelay(pdMS_TO_TICKS(100));}
     
+}
+
+/*Check for new updates*/
+void checkUpdates(){
+  secureEsp32FOTA._host="raw.githubusercontent.com"; //e.g. example.com
+  secureEsp32FOTA._descriptionOfFirmwareURL="/User/Repository/main/firmware.json"; 
+  secureEsp32FOTA._certificate=test_root_ca;
+  secureEsp32FOTA.clientForOta=client2;
+
+  bool shouldExecuteFirmwareUpdate=secureEsp32FOTA.execHTTPSCheck();
+  if(shouldExecuteFirmwareUpdate)
+  {
+    Serial.println("Firmware update available!");
+    secureEsp32FOTA.executeOTA();
+  }
 }
 
 /*Get actual time.*/

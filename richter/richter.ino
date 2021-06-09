@@ -1,10 +1,5 @@
 #include "prototypes.h"
 
-/*Over the Air Updates*/
-esp32FOTA esp32FOTA("esp32-fota-http", V_FIRMWARE); 
-
-
-
 /*Interrupt of recharging*/
 void IRAM_ATTR rechargebleISR()
 {
@@ -52,9 +47,6 @@ void setup()
 
   /*Init MQTT*/
   init_mqtt();
-
-  /*Over the Air Updates*/
-  esp32FOTA.checkURL = "yourURL/firmware.json";
   
   /*Init ESP-NOW*/
   if (esp_now_init() != ESP_OK) {
@@ -80,14 +72,10 @@ void loop()
   verifica_conexoes_wifi_mqtt();
   MQTT.loop();
 
-  /*Faz a configuração dos modulos periodicamente caso estejam ociosos.*/
+  /*Check for new updates from github.*/
   if ((millis() - lastCheck) > checkInterval)
   {
-    updatedNeeded = esp32FOTA.execHTTPcheck();
-    if (updatedNeeded)
-    {
-      esp32FOTA.execOTA();
-    } 
+    checkUpdates();
   }
 
   /*Evaluate the perimeter and check for too close objects.*/
