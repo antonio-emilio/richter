@@ -189,7 +189,7 @@ void dosetup() {
     LMIC.dn2Dr = DR_SF9;
 
     // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
-    LMIC_setDrTxpow(DR_SF7,14);
+    LMIC_setDrTxpow(SF12,14);
 
     // Start job
     do_send(&sendjob);
@@ -197,4 +197,298 @@ void dosetup() {
 
 void doloop() {
     os_runloop_once();
+}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <Base64.h>
+
+boolean receivePkt(char *payload)
+{
+
+  // clear rxDone
+  writeRegister(REG_IRQ_FLAGS, 0x40);
+  int irqflags = readRegister(REG_IRQ_FLAGS);
+  cp_nb_rx_rcv++;
+  //  payload crc: 0x20
+  if ((irqflags & 0x20) == 0x20)
+  {
+    printf("CRC error\n");
+    writeRegister(REG_IRQ_FLAGS, 0x20);
+    return false;
+  }
+  else
+  {
+
+    cp_nb_rx_ok++;
+
+    byte currentAddr = readRegister(REG_FIFO_RX_CURRENT_ADDR);
+    byte receivedCount = readRegister(REG_RX_NB_BYTES);
+    receivedbytes = receivedCount;
+
+    writeRegister(REG_FIFO_ADDR_PTR, currentAddr);
+
+    for (int i = 0; i < receivedCount; i++)
+    {
+      payload[i] = (char)readRegister(REG_FIFO);
+    }
+  }
+  return true;
+}
+
+void SetupLoRa(uint32_t frequencia)
+{
+  freq2 = frequencia;
+  byte version = readRegister(REG_VERSION);
+  if (version == 0x22)
+  {
+    // sx1272
+    printf("SX1272 detected, starting.\n");
+    sx1272 = true;
+  }
+  else
+  {
+    // sx1276?
+    digitalWrite(RST, LOW);
+    delay(100);
+    digitalWrite(RST, HIGH);
+    delay(100);
+    version = readRegister(REG_VERSION);
+    if (version == 0x12)
+    {
+      // sx1276
+      sx1272 = false;
+    }
+    else
+    {
+      Serial.println("Module has not been found");
+    }
+  }
+
+  writeRegister(REG_OPMODE, SX72_MODE_SLEEP);
+
+  // set frequency
+  uint64_t frf = ((uint64_t)freq2 << 19) / 32000000;
+  writeRegister(REG_FRF_MSB, (uint8_t)(frf >> 16));
+  writeRegister(REG_FRF_MID, (uint8_t)(frf >> 8));
+  writeRegister(REG_FRF_LSB, (uint8_t)(frf >> 0));
+
+  writeRegister(REG_SYNC_WORD, 0x34); // LoRaWAN public sync word
+
+  if (sx1272)
+  {
+    if (sf == SF11 || sf == SF12)
+    {
+      writeRegister(REG_MODEM_CONFIG, 0x0B);
+    }
+    else
+    {
+      writeRegister(REG_MODEM_CONFIG, 0x0A);
+    }
+    writeRegister(REG_MODEM_CONFIG2, (sf << 4) | 0x04);
+  }
+  else
+  {
+    if (sf == SF11 || sf == SF12)
+    {
+      writeRegister(REG_MODEM_CONFIG3, 0x0C);
+    }
+    else
+    {
+      writeRegister(REG_MODEM_CONFIG3, 0x04);
+    }
+    writeRegister(REG_MODEM_CONFIG, 0x72);
+    writeRegister(REG_MODEM_CONFIG2, (sf << 4) | 0x04);
+  }
+
+  if (sf == SF10 || sf == SF11 || sf == SF12)
+  {
+    writeRegister(REG_SYMB_TIMEOUT_LSB, 0x05);
+  }
+  else
+  {
+    writeRegister(REG_SYMB_TIMEOUT_LSB, 0x08);
+  }
+  writeRegister(REG_MAX_PAYLOAD_LENGTH, 0x80);
+  writeRegister(REG_PAYLOAD_LENGTH, PAYLOAD_LENGTH);
+  writeRegister(REG_HOP_PERIOD, 0xFF);
+  writeRegister(REG_FIFO_ADDR_PTR, readRegister(REG_FIFO_RX_BASE_AD));
+
+  // Set Continous Receive Mode
+  writeRegister(REG_LNA, LNA_MAX_GAIN); // max lna gain
+  writeRegister(REG_OPMODE, SX72_MODE_RX_CONTINUOS);
+}
+
+void receivepacket()
+{
+
+  long int SNR;
+  int rssicorr;
+  if (receivePkt(message))
+  {
+    byte value = readRegister(REG_PKT_SNR_VALUE);
+    if (value & 0x80) // The SNR sign bit is 1
+    {
+      // Invert and divide by 4
+      value = ((~value + 1) & 0xFF) >> 2;
+      SNR = -value;
+    }
+    else
+    {
+      // Divide by 4
+      SNR = (value & 0xFF) >> 2;
+    }
+
+    if (sx1272)
+    {
+      rssicorr = 139;
+    }
+    else
+    {
+      rssicorr = 157;
+    }
+
+    int j;
+    j = bin_to_b64((uint8_t *)message, receivedbytes, (char *)(b64), 341);
+    //fwrite(b64, sizeof(char), j, stdout);
+
+    char buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
+    char buff_up_msg[TX_BUFF_SIZE];
+    int buff_index = 0;
+
+    /* gateway <-> MAC protocol variables */
+    //static uint32_t net_mac_h; /* Most Significant Nibble, network order */
+    //static uint32_t net_mac_l; /* Least Significant Nibble, network order */
+
+    /* pre-fill the data buffer with fixed fields */
+    buff_up[0] = PROTOCOL_VERSION;
+    buff_up[3] = PKT_PUSH_DATA;
+
+    /* process some of the configuration variables */
+    //net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (lgwm>>32)));
+    //net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  lgwm  ));
+    //*(uint32_t *)(buff_up + 4) = net_mac_h;
+    //*(uint32_t *)(buff_up + 8) = net_mac_l;
+
+    buff_up[4] = (unsigned char)0x00;
+    buff_up[5] = (unsigned char)0x00;
+    buff_up[6] = (unsigned char)0x00;
+    buff_up[7] = 0xFF;
+    buff_up[8] = 0xFF;
+    buff_up[9] = (unsigned char)0x00;
+    buff_up[10] = (unsigned char)0x00;
+    buff_up[11] = (unsigned char)0x00;
+
+    /* start composing datagram with the header */
+    uint8_t token_h = (uint8_t)rand(); /* random token */
+    uint8_t token_l = (uint8_t)rand(); /* random token */
+    buff_up[1] = token_h;
+    buff_up[2] = token_l;
+    buff_index = 12; /* 12-byte header */
+
+    // TODO: tmst can jump is time is (re)set, not good.
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    uint32_t tmst = (uint32_t)(now.tv_sec * 1000000 + now.tv_usec);
+
+    /* start of JSON structure */
+    memcpy((void *)(buff_up + buff_index), (void *)"{\"rxpk\":[", 9);
+    buff_index += 9;
+    buff_up[buff_index] = '{';
+    ++buff_index;
+    j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "\"tmst\":%u", tmst);
+    buff_index += j;
+    j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"chan\":%1u,\"rfch\":%1u,\"freq2\":%.6lf", 0, 0, (double)freq2 / 1000000);
+    buff_index += j;
+    memcpy((void *)(buff_up + buff_index), (void *)",\"stat\":1", 9);
+    buff_index += 9;
+    memcpy((void *)(buff_up + buff_index), (void *)",\"modu\":\"LORA\"", 14);
+    buff_index += 14;
+    /* Lora datarate & bandwidth, 16-19 useful chars */
+    switch (sf)
+    {
+    case SF7:
+      memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF7", 12);
+      buff_index += 12;
+      break;
+    case SF8:
+      memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF8", 12);
+      buff_index += 12;
+      break;
+    case SF9:
+      memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF9", 12);
+      buff_index += 12;
+      break;
+    case SF10:
+      memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF10", 13);
+      buff_index += 13;
+      break;
+    case SF11:
+      memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF11", 13);
+      buff_index += 13;
+      break;
+    case SF12:
+      memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF12", 13);
+      buff_index += 13;
+      break;
+    default:
+      memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF?", 12);
+      buff_index += 12;
+    }
+    memcpy((void *)(buff_up + buff_index), (void *)"BW125\"", 6);
+    buff_index += 6;
+    memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/5\"", 13);
+    buff_index += 13;
+    j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"lsnr\":%li", SNR);
+    buff_index += j;
+    j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%d,\"size\":%u", readRegister(0x1A) - rssicorr, receivedbytes);
+    buff_index += j;
+    memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9);
+    buff_index += 9;
+    j = bin_to_b64((uint8_t *)message, receivedbytes, (char *)(buff_up + buff_index), 341);
+
+    /*Descriptografando o pacote....*/
+    j = bin_to_b64((uint8_t *)message, receivedbytes, (char *)(buff_up_msg + buff_index), 341); //BASE64
+    int input2Len = sizeof((char *)(buff_up_msg + buff_index));
+    int decodedLen = base64_dec_len((buff_up_msg + buff_index), receivedbytes);
+    char decoded[decodedLen];
+    base64_decode(decoded, (char *)(buff_up_msg + buff_index), receivedbytes);
+    uint8_t payload[receivedbytes];
+    String auxString = "";
+    for (int i = 0; i < receivedbytes; i++)
+    {
+      payload[i] = decoded[i];
+    }
+    String payloadDecrypt = decryptPayload(payload, receivedbytes);
+    /*Descriptografia finalizada.*/
+
+    rssiAtual = readRegister(0x1B) - rssicorr;
+    printf("Packet RSSI: %d, ", readRegister(0x1A) - rssicorr);
+    printf("RSSI: %d, ", rssiAtual);
+    printf("SNR: %li, ", SNR);
+    printf("Length: %i", (int)receivedbytes);
+    printf("\n");
+
+    buff_index += j;
+    buff_up[buff_index] = '"';
+    ++buff_index;
+
+    /* End of packet serialization */
+    buff_up[buff_index] = '}';
+    ++buff_index;
+    buff_up[buff_index] = ']';
+    ++buff_index;
+    /* end of JSON datagram payload */
+    buff_up[buff_index] = '}';
+    ++buff_index;
+    buff_up[buff_index] = 0; /* add string terminator, for safety */
+
+    printf("rxpk update: %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+
+    pkt1 = payloadDecrypt;
+
+    fflush(stdout);
+
+  } // received a message
 }
