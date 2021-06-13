@@ -25,6 +25,8 @@
 #include "esp_wpa2.h"
 #include <esp_wifi.h>
 #include "FS_File_Record.h"  // Nossa lib personalizada do SPIFFS
+#include <lmic.h>
+#include <hal/hal.h>
 
 
 /*Declaration*/

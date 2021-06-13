@@ -21,10 +21,10 @@ extern "C"{
 //
 
 enum _cr_t { CR_4_5=0, CR_4_6, CR_4_7, CR_4_8 };
-enum _sf2_t { FSK=0, SF72, SF82, SF92, SF102, SF112, SF122, SFrfu };
+enum _sf_t { FSK=0, SF7, SF8, SF9, SF10, SF11, SF12, SFrfu };
 enum _bw_t { BW125=0, BW250, BW500, BWrfu };
 typedef u1_t cr_t;
-typedef u1_t sf2_t;
+typedef u1_t sf_t;
 typedef u1_t bw_t;
 typedef u1_t dr_t;
 // Radio parameter set (encodes SF/BW/CR/IH/NOCRC)
@@ -60,8 +60,8 @@ enum { BCN_SLOT_SPAN_us  =   30000 };
 
 #if defined(CFG_eu868) // ==============================================
 
-enum _dr_eu868_t { DR_SF122=0, DR_SF112, DR_SF102, DR_SF92, DR_SF82, DR_SF72, DR_SF72B, DR_FSK, DR_NONE };
-enum { DR_DFLTMIN = DR_SF72 };
+enum _dr_eu868_t { DR_SF12=0, DR_SF11, DR_SF10, DR_SF9, DR_SF8, DR_SF7, DR_SF7B, DR_FSK, DR_NONE };
+enum { DR_DFLTMIN = DR_SF7 };
 enum { DR_PAGE = DR_PAGE_EU868 };
 
 // Default frequency plan for EU 868MHz ISM band
@@ -70,32 +70,32 @@ enum { DR_PAGE = DR_PAGE_EU868 };
 //  g2 : 0.1%  14dBm
 //  g3 :  10%  27dBm
 //                 freq             band     datarates
-enum { EU868_F1 = 433175000,      // g1   SF7-12
-       EU868_F2 = 433375000,      // g1   SF7-12 FSK SF7/250
-       EU868_F3 = 433575000,      // g1   SF7-12
-       EU868_F4 = 433775000,      // g2   SF7-12
-       EU868_F5 = 433975000,      // g2   SF7-12
-       EU868_F6 = 434175000,      // g3   SF7-12
-       EU868_J4 = 434375000,      // g2   SF7-12  used during join
-       EU868_J5 = 434575000,      // g2   SF7-12   ditto
-       EU868_J6 = 434775000,      // g2   SF7-12   ditto
+enum { EU868_F1 = 868100000,      // g1   SF7-12
+       EU868_F2 = 868300000,      // g1   SF7-12 FSK SF7/250
+       EU868_F3 = 868500000,      // g1   SF7-12
+       EU868_F4 = 868850000,      // g2   SF7-12
+       EU868_F5 = 869050000,      // g2   SF7-12
+       EU868_F6 = 869525000,      // g3   SF7-12
+       EU868_J4 = 864100000,      // g2   SF7-12  used during join
+       EU868_J5 = 864300000,      // g2   SF7-12   ditto
+       EU868_J6 = 864500000,      // g2   SF7-12   ditto
 };
-enum { EU868_FREQ_MIN = 433050000,
-       EU868_FREQ_MAX = 434900000 };
+enum { EU868_FREQ_MIN = 863000000,
+       EU868_FREQ_MAX = 870000000 };
 
 enum { CHNL_PING         = 5 };
 enum { FREQ_PING         = EU868_F6 };  // default ping freq
-enum { DR_PING           = DR_SF92 };       // default ping DR
+enum { DR_PING           = DR_SF9 };       // default ping DR
 enum { CHNL_DNW2         = 5 };
 enum { FREQ_DNW2         = EU868_F6 };
-enum { DR_DNW2           = DR_SF122 };
+enum { DR_DNW2           = DR_SF12 };
 enum { CHNL_BCN          = 5 };
 enum { FREQ_BCN          = EU868_F6 };
-enum { DR_BCN            = DR_SF92 };
+enum { DR_BCN            = DR_SF9 };
 enum { AIRTIME_BCN       = 144384 };  // micros
 
 enum {
-    // Beacon frame format EU SF92
+    // Beacon frame format EU SF9
     OFF_BCN_NETID    = 0,
     OFF_BCN_TIME     = 3,
     OFF_BCN_CRC1     = 7,
@@ -108,10 +108,10 @@ enum {
 
 #elif defined(CFG_us915)  // =========================================
 
-enum _dr_us915_t { DR_SF102=0, DR_SF92, DR_SF82, DR_SF72, DR_SF82C, DR_NONE,
+enum _dr_us915_t { DR_SF10=0, DR_SF9, DR_SF8, DR_SF7, DR_SF8C, DR_NONE,
                    // Devices behind a router:
-                   DR_SF122CR=8, DR_SF112CR, DR_SF102CR, DR_SF92CR, DR_SF82CR, DR_SF72CR };
-enum { DR_DFLTMIN = DR_SF82C };
+                   DR_SF12CR=8, DR_SF11CR, DR_SF10CR, DR_SF9CR, DR_SF8CR, DR_SF7CR };
+enum { DR_DFLTMIN = DR_SF8C };
 enum { DR_PAGE = DR_PAGE_US915 };
 
 // Default frequency plan for US 915MHz
@@ -127,16 +127,16 @@ enum { US915_FREQ_MIN = 902000000,
 
 enum { CHNL_PING         = 0 }; // used only for default init of state (follows beacon - rotating)
 enum { FREQ_PING         = US915_500kHz_DNFBASE + CHNL_PING*US915_500kHz_DNFSTEP };  // default ping freq
-enum { DR_PING           = DR_SF102CR };       // default ping DR
+enum { DR_PING           = DR_SF10CR };       // default ping DR
 enum { CHNL_DNW2         = 0 };
 enum { FREQ_DNW2         = US915_500kHz_DNFBASE + CHNL_DNW2*US915_500kHz_DNFSTEP };
-enum { DR_DNW2           = DR_SF122CR };
+enum { DR_DNW2           = DR_SF12CR };
 enum { CHNL_BCN          = 0 }; // used only for default init of state (rotating beacon scheme)
-enum { DR_BCN            = DR_SF102CR };
+enum { DR_BCN            = DR_SF10CR };
 enum { AIRTIME_BCN       = 72192 };  // micros
 
 enum {
-    // Beacon frame format US SF102
+    // Beacon frame format US SF10
     OFF_BCN_NETID    = 0,
     OFF_BCN_TIME     = 3,
     OFF_BCN_CRC1     = 7,
@@ -296,13 +296,13 @@ enum {
     MCMD_LADR_DR_SHIFT   = 4,
     MCMD_LADR_POW_SHIFT  = 0,
 #if defined(CFG_eu868)
-    MCMD_LADR_SF122      = DR_SF122<<4,
-    MCMD_LADR_SF112      = DR_SF112<<4,
-    MCMD_LADR_SF102      = DR_SF102<<4,
-    MCMD_LADR_SF92       = DR_SF92 <<4,
-    MCMD_LADR_SF82       = DR_SF82 <<4,
-    MCMD_LADR_SF72       = DR_SF72 <<4,
-    MCMD_LADR_SF72B      = DR_SF72B<<4,
+    MCMD_LADR_SF12      = DR_SF12<<4,
+    MCMD_LADR_SF11      = DR_SF11<<4,
+    MCMD_LADR_SF10      = DR_SF10<<4,
+    MCMD_LADR_SF9       = DR_SF9 <<4,
+    MCMD_LADR_SF8       = DR_SF8 <<4,
+    MCMD_LADR_SF7       = DR_SF7 <<4,
+    MCMD_LADR_SF7B      = DR_SF7B<<4,
     MCMD_LADR_FSK       = DR_FSK <<4,
 
     MCMD_LADR_20dBm     = 0,
@@ -312,17 +312,17 @@ enum {
     MCMD_LADR_5dBm      = 4,
     MCMD_LADR_2dBm      = 5,
 #elif defined(CFG_us915)
-    MCMD_LADR_SF102      = DR_SF102<<4,
-    MCMD_LADR_SF92       = DR_SF92 <<4,
-    MCMD_LADR_SF82       = DR_SF82 <<4,
-    MCMD_LADR_SF72       = DR_SF72 <<4,
-    MCMD_LADR_SF82C      = DR_SF82C<<4,
-    MCMD_LADR_SF122CR    = DR_SF122CR<<4,
-    MCMD_LADR_SF112CR    = DR_SF112CR<<4,
-    MCMD_LADR_SF102CR    = DR_SF102CR<<4,
-    MCMD_LADR_SF92CR     = DR_SF92CR<<4,
-    MCMD_LADR_SF82CR     = DR_SF82CR<<4,
-    MCMD_LADR_SF72CR     = DR_SF72CR<<4,
+    MCMD_LADR_SF10      = DR_SF10<<4,
+    MCMD_LADR_SF9       = DR_SF9 <<4,
+    MCMD_LADR_SF8       = DR_SF8 <<4,
+    MCMD_LADR_SF7       = DR_SF7 <<4,
+    MCMD_LADR_SF8C      = DR_SF8C<<4,
+    MCMD_LADR_SF12CR    = DR_SF12CR<<4,
+    MCMD_LADR_SF11CR    = DR_SF11CR<<4,
+    MCMD_LADR_SF10CR    = DR_SF10CR<<4,
+    MCMD_LADR_SF9CR     = DR_SF9CR<<4,
+    MCMD_LADR_SF8CR     = DR_SF8CR<<4,
+    MCMD_LADR_SF7CR     = DR_SF7CR<<4,
 
     MCMD_LADR_30dBm     = 0,
     MCMD_LADR_28dBm     = 1,
@@ -344,8 +344,8 @@ typedef u4_t devaddr_t;
 // RX quality (device)
 enum { RSSI_OFF=64, SNR_SCALEUP=4 };
 
-inline sf2_t  getSf   (rps_t params)            { return   (sf2_t)(params &  0x7); }
-inline rps_t setSf   (rps_t params, sf2_t sf)   { return (rps_t)((params & ~0x7) | sf); }
+inline sf_t  getSf   (rps_t params)            { return   (sf_t)(params &  0x7); }
+inline rps_t setSf   (rps_t params, sf_t sf)   { return (rps_t)((params & ~0x7) | sf); }
 inline bw_t  getBw   (rps_t params)            { return  (bw_t)((params >> 3) & 0x3); }
 inline rps_t setBw   (rps_t params, bw_t cr)   { return (rps_t)((params & ~0x18) | (cr<<3)); }
 inline cr_t  getCr   (rps_t params)            { return  (cr_t)((params >> 5) & 0x3); }
@@ -354,7 +354,7 @@ inline int   getNocrc(rps_t params)            { return        ((params >> 7) & 
 inline rps_t setNocrc(rps_t params, int nocrc) { return (rps_t)((params & ~0x80) | (nocrc<<7)); }
 inline int   getIh   (rps_t params)            { return        ((params >> 8) & 0xFF); }
 inline rps_t setIh   (rps_t params, int ih)    { return (rps_t)((params & ~0xFF00) | (ih<<8)); }
-inline rps_t makeRps (sf2_t sf, bw_t bw, cr_t cr, int ih, int nocrc) {
+inline rps_t makeRps (sf_t sf, bw_t bw, cr_t cr, int ih, int nocrc) {
     return sf | (bw<<3) | (cr<<5) | (nocrc?(1<<7):0) | ((ih&0xFF)<<8);
 }
 #define MAKERPS(sf,bw,cr,ih,nocrc) ((rps_t)((sf) | ((bw)<<3) | ((cr)<<5) | ((nocrc)?(1<<7):0) | ((ih&0xFF)<<8)))

@@ -127,7 +127,7 @@ String RECHARGING = "{\"id\":" + String(id) + ",\"cmd\":\"RECHARGING\"}";
 /*Over the Air Update*/
 bool updatedNeeded = false;
 
-/*LoraWAN*/
+/*LoraWAN*//*
 int rssiAtual = 0;
 uint32_t address = 0;
 uint8_t LoRaMacRxPayload[255];
@@ -155,7 +155,7 @@ enum sf_t
     SF12
 };
 sf_t sf = SF12;
-
+*/
 /*Motor A AND B*/
 int motor1Pin1Left = 27; 
 int motor1Pin2Left = 26; 
