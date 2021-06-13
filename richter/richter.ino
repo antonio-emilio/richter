@@ -1,10 +1,5 @@
 #include "prototypes.h"
 
-/*Interrupt of recharging*/
-void IRAM_ATTR rechargebleISR()
-{
-  isCharging = 1;
-}
 
 /*Run once.*/
 void setup() 
