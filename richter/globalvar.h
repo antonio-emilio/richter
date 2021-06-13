@@ -1,3 +1,4 @@
+/*Certificates*/
 const char * root_ca=\
 "-----BEGIN CERTIFICATE-----\n" \
 "MIIDujCCAqKgAwIBAgILBAAAAAABD4Ym5g0wDQYJKoZIhvcNAQEFBQAwTDEgMB4G\n" \
@@ -67,7 +68,7 @@ char* test_root_ca= \
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\n" \
 "-----END CERTIFICATE-----\n";
 
-/*Variáveis*/
+/*Variables*/
 String formattedDate; 
 int isWaitingForOta = 0; 
 int estado = 0;
@@ -95,9 +96,24 @@ int r = 0;
 unsigned long t_s1 = 0;
 unsigned long t_0_s1 = 0;
 
+/*Spiffs*/
+String errorMsg;
+
+/*Wifi Connection*/
+const char* ssid = "richter";//AP ssid
+const char* password = "richter@123robot";//AP password
+const char* ssidRouter = "xxxx";//STA router ssid
+const char* passwordRouter = "xxxxxx";//STA router password
+
+/*UDP Connection*/
+int packetSize = 0;
+int len = 0;
+char incomingPacket[255];  // buffer for incoming packets
+
 /*General variables*/
 int id = 0;
 int debugSocket = 0;
+int j = 0;
 
 /*FIRMWARE VERSION*/
 int V_FIRMWARE = 0;
@@ -123,8 +139,6 @@ int avoidBack = 0;
 int avoidFront = 0;
 int avoidRight = 0;
 int avoidLeft = 0;
-
-
 
 /*Sleep mode*/
 int isCharging = 0;

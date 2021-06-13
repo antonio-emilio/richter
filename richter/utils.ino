@@ -157,29 +157,38 @@ void reconnect_wifi()
 {
     if (WiFi.status() == WL_CONNECTED)
         return;
-    WiFi.disconnect(true);
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    WiFi.mode(WIFI_STA);
-    vTaskDelay(pdMS_TO_TICKS(1000));
-  
-  
-    WiFiManager wifiManager;
-    WiFi.setAutoConnect(true);
-    wifiManager.setTimeout(80);
-    wifiManager.setBreakAfterConfig(true);
-    wifiManager.setConfigPortalTimeout(180);
-  
-    if (!wifiManager.autoConnect("Richter", "12345678")) {
-      Serial.println("Failed to connect. Restarting...");
-      vTaskDelay(pdMS_TO_TICKS(100));
-      if (isWaitingForOta == 0) {
-        ESP.restart();
-      }
+
+    WiFi.mode( WIFI_AP_STA );
+    WiFi.begin(ssidRouter,passwordRouter); 
+
+    Serial.println("[WIFI] Trying to connect to wifi network");
+
+    /*Enables station mode*/
+    WiFi.mode( WIFI_STA );
+    while (WiFi.status() != WL_CONNECTED) 
+    {
+      delay(500);
+      Serial.print(".");
     }
-    Serial.println();
-    Serial.print("Connected.");
+   
+    j = esp_wifi_set_protocol( WIFI_IF_STA, WIFI_PROTOCOL_LR );
+    if (j == SUCCESFULL)
+    {
+      Serial.println("[WIFI] LR mode enabled.");
+    }
+    else
+    {
+      Serial.println("[WIFI] LR mode could not be enabled.");
+    }
+      
+    WiFi.begin(ssid, password);//this ssid is not visible
+
+    Serial.println("[WIFI] WiFi connected");
+    Serial.print("[WIFI] IP address: ");
+    Serial.println(WiFi.localIP());
 
 }
+
 
 /*
 Check all connections.

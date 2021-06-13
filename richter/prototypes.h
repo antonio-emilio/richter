@@ -2,7 +2,6 @@
 #include <WiFi.h> 
 #include <PubSubClient.h>
 #include <WiFiManager.h>         
-#include <WiFi.h>
 #include <esp_now.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -24,9 +23,13 @@
 #include <Ultrasonic.h>
 #include <PID_v1.h>
 #include "esp_wpa2.h"
+#include <esp_wifi.h>
+#include "FS_File_Record.h"  // Nossa lib personalizada do SPIFFS
 
 /*Declaration*/
 WiFiClientSecure client2; 
+WiFiUDP udp;
+FS_File_Record ObjFS("/log.bin", 20);
 WiFiUDP ntpUDP; 
 NTPClient timeClient(ntpUDP);
 WiFiClient espClient;
@@ -41,6 +44,11 @@ void vLow(void *pvParameters);
 void vLowSerial(void *pvParameters);
 void vLowLED(void *pvParameters);
 secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
+
+/*udp.ino*/
+void initUDP();
+int sendUDPmsg(String replyPacket);
+void checkUDPmsg();
 
 /*richter.ino*/
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
