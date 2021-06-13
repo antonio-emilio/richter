@@ -127,6 +127,35 @@ String RECHARGING = "{\"id\":" + String(id) + ",\"cmd\":\"RECHARGING\"}";
 /*Over the Air Update*/
 bool updatedNeeded = false;
 
+/*LoraWAN*/
+int rssiAtual = 0;
+uint32_t address = 0;
+uint8_t LoRaMacRxPayload[255];
+typedef bool boolean;
+typedef unsigned char byte;
+static const int CHANNEL = 0;
+byte currentMode = 0x81;
+char message[256];
+char b64[256];
+bool sx1272 = true;
+byte receivedbytes;
+uint32_t cp_nb_rx_rcv;
+uint32_t cp_nb_rx_ok;
+uint32_t cp_nb_rx_bad;
+uint32_t cp_nb_rx_nocrc;
+uint32_t cp_up_pkt_fwd;
+String pkt1;
+enum sf_t
+{
+    SF7 = 7,
+    SF8,
+    SF9,
+    SF10,
+    SF11,
+    SF12
+};
+sf_t sf = SF12;
+
 /*Motor A AND B*/
 int motor1Pin1Left = 27; 
 int motor1Pin2Left = 26; 

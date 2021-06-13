@@ -26,6 +26,7 @@
 #include <esp_wifi.h>
 #include "FS_File_Record.h"  // Nossa lib personalizada do SPIFFS
 
+
 /*Declaration*/
 WiFiClientSecure client2; 
 WiFiUDP udp;
