@@ -31,28 +31,27 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   socketPrint("");
 }
 
+/*Configure the espnow interface.*/
 int configESPNOW(){
-  /*If richter is configured as sender*/
-  if (sender){
-    esp_now_register_send_cb(OnDataSent);
-    
-    /*Register peer*/
-    esp_now_peer_info_t peerInfo;
-    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
-    peerInfo.channel = 0;  
-    peerInfo.encrypt = false;
 
-    /*Add peer*/
-    if (esp_now_add_peer(&peerInfo) != ESP_OK){
-      socketPrint("Failed to add peer");
-      return 0;
-    }
-  } else { 
-    /*If richter is configured as receiver*/
-     esp_now_register_recv_cb(OnDataRecv);
+  esp_now_register_send_cb(OnDataSent);
+  
+  /*Register peer*/
+  esp_now_peer_info_t peerInfo;
+  memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+  peerInfo.channel = 0;  
+  peerInfo.encrypt = false;
+
+  /*Add peer*/
+  if (esp_now_add_peer(&peerInfo) != ESP_OK){
+    socketPrint("Failed to add peer");
+    return ERROR;
   }
 
-  return 1;
+  /*If richter is configured as receiver*/
+    esp_now_register_recv_cb(OnDataRecv);
+
+  return SUCCESFULL;
 }
 
 

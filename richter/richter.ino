@@ -6,98 +6,64 @@ void IRAM_ATTR rechargebleISR()
   isCharging = 1;
 }
 
+/*Run once.*/
 void setup() 
 {
-  /*Init non vollatile memory*/
-  NVS.begin(); 
-
-  /*Get values from NVS*/  
-  getValuesFromNVS();
-
-  /*Configure all pins as input, output...*/
-  configurePins();
-
-  /*Configure SPI*/
-  SPI.begin(18, 19, 23, SS); 
-
-  /*Configure I2C*/
-  Wire.begin(); 
-  i2cdetect();       
-  
-  /*Configure LED PWM functionalitites*/
-  ledcSetup(pwmChannel, freq, resolution);
-  ledcSetup(pwmChannel2, freq, resolution);
-  
-  /*Attach the channel to the GPIO to be controlled*/
-  ledcAttachPin(enable1Pin, pwmChannel);
-  ledcAttachPin(enable2Pin, pwmChannel2);
-
-  /*Configure the sleep mode in case we need.*/
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-
-  /*Init serial.*/
-  init_serial();
-  
-  /*Create tasks to control the serial communication and LEDS.*/
-  xTaskCreate(vLowSerial, "vLowSerial", 10000, NULL, 0, &task_low_serial);
-  xTaskCreate(vLowLED, "vLowLED", 10000, NULL, 0, &task_low_led);
-
-  /*Configure PID functionalities*/
-  myPID.SetMode(AUTOMATIC);
-
-  /*Init wifi*/
-  init_wifi();
-
-  /*Starts socket connection*/
-  if (!client.connect("yourServer", 1883)) {
-    Serial.println("Socket connection has failed.");
-    return;
-  }
-
-  /*Init MQTT*/
-  init_mqtt();
-  
-  /*Init ESP-NOW*/
-  if (esp_now_init() != ESP_OK) {
-    socketPrint("Error initializing ESP-NOW");
-    return;
-  }
-
-  /*Make all configs to use ESP-NOW*/
-  configESPNOW();
-
-  /*Interrupts*/
-  attachInterrupt(pinRecharge, rechargebleISR, RISING); 
-
-  /*Publish a topic to tell he's alive.*/
-  MQTT.publish(TOPICO_PUBLISH, "Richter has been initialized successfully.");
-  socketPrint("Richter has been initialized successfully.");
-  
+  /*Do all initial setups.*/
+  initRichter(); 
 }
 
+/*While loop.*/
 void loop() 
-{  
-  /*Check the wifi and mqtt connection, and keeps the mqtt connection alive.*/ 
-  verifica_conexoes_wifi_mqtt();
-  MQTT.loop();
+{
+  /*Resets the watchdog interface.*/
+  esp_task_wdt_reset(); 
 
-  /*Check for new updates from github.*/
-  if ((millis() - lastCheck) > checkInterval)
-  {
-    checkUpdates();
+  /*Run the state machine.*/
+  SM_s1();
+
+}
+
+/*State machine workflow.*/
+void SM_s1() {
+
+  /*State machine selection*/
+  switch (state_s1) {
+    case STATE_0: 
+
+      /*Check the wifi and mqtt connection, and keeps the mqtt connection alive.*/ 
+      r = checkConnections();
+      MQTT.loop();
+
+      if (r == SUCCESFULL) {state_s1 = 1;} 
+    break;
+
+    case STATE_1: 
+
+      /*Evaluate the perimeter and check for too close objects.*/
+      r = checkPerimeter();
+
+      /*Calculate the PID.*/
+      myPID.Compute();
+
+      if (r == SUCCESFULL) {state_s1 = 2;} 
+    break;
+
+    case STATE_2: 
+
+      /*Check if richter is charging. If true, check for updates and goes to sleep.*/
+      if(isCharging){
+        checkUpdates(); 
+        sendMessageESPNOW(RECHARGING, true);  
+        esp_deep_sleep_start();
+      }
+
+      if (r == SUCCESFULL) {state_s1 = 0;} 
+    break;
+
+    default:
+      /*Something went wrong?*/
+      break;
   }
-
-  /*Evaluate the perimeter and check for too close objects.*/
-  checkPerimeter();
-
-  /*Calculate the PID.*/
-  myPID.Compute();
-
-  /*Check if richter is charging. If true, goes to sleep.*/
-  if(isCharging){
-    sendMessageESPNOW(RECHARGING, true);
-    esp_deep_sleep_start();
-  }
-
-    
+  
 }

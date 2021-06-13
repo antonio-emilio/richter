@@ -57,7 +57,7 @@ int getDistanceBack()
 }
 
 /*Verify all sensors*/
-void checkPerimeter(){
+int checkPerimeter(){
   int distanceBack = getDistanceBack();
   int distanceFront = getDistanceFront();
   int distanceRight = getDistanceRight();
@@ -74,4 +74,6 @@ void checkPerimeter(){
 
   if (distanceLeft < 20)
     avoidLeft = 1;
+
+  return SUCCESFULL;
 }

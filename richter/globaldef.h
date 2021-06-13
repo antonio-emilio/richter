@@ -20,6 +20,28 @@
 #define PORTA_ECHO4      5
 #define pinRecharge      4
 
+/*Cores*/
+#define CORE_0 0
+#define CORE_1 1
+
+/*States*/
+#define SUCCESFULL 1
+#define ERROR 0
+#define STATE_0 0
+#define STATE_1 1
+#define STATE_2 2
+
+/*Priorities*/
+#define PRIORITY_1 1
+#define PRIORITY_2 2
+#define PRIORITY_3 3
+#define PRIORITY_4 4
+#define PRIORITY_5 5
+#define PRIORITY_6 6
+#define PRIORITY_7 7
+#define PRIORITY_8 8
+#define PRIORITY_9 9
+
 /*Intervals*/
 #define checkInterval 600000
 

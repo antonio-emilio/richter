@@ -49,7 +49,7 @@ void LeftMotorPWM(String action, int dutyCycle, int delayTime){
     while (dutyCycle <= 255){
       ledcWrite(pwmChannel, dutyCycle);   
       dutyCycle = dutyCycle + 5;
-      delay(delayTime);
+      vTaskDelay(pdMS_TO_TICKS(delayTime));
     }
     
   } else if (action.equals("BACKWARD")){
@@ -58,7 +58,7 @@ void LeftMotorPWM(String action, int dutyCycle, int delayTime){
     while (dutyCycle <= 255){
       ledcWrite(pwmChannel, dutyCycle);   
       dutyCycle = dutyCycle + 5;
-      delay(delayTime);
+      vTaskDelay(pdMS_TO_TICKS(delayTime));
     }
   }
 }
@@ -74,7 +74,7 @@ void RightMotorPWM(String action, int dutyCycle, int delayTime){
     while (dutyCycle <= 255){
       ledcWrite(pwmChannel2, dutyCycle);   
       dutyCycle = dutyCycle + 5;
-      delay(delayTime);
+      vTaskDelay(pdMS_TO_TICKS(delayTime));
     }
     
   } else if (action.equals("BACKWARD")){
@@ -83,7 +83,7 @@ void RightMotorPWM(String action, int dutyCycle, int delayTime){
     while (dutyCycle <= 255){
       ledcWrite(pwmChannel2, dutyCycle);   
       dutyCycle = dutyCycle + 5;
-      delay(delayTime);
+      vTaskDelay(pdMS_TO_TICKS(delayTime));
     }
   }
 }

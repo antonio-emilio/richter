@@ -86,6 +86,15 @@ int sender = 0;
 
 struct_message myData;
 
+/*State machine*/
+int state_s1 = 0;
+int state_prev_s1 = 0;
+int pin_s1 = 12;
+int val_s1 = 0;
+int r = 0;
+unsigned long t_s1 = 0;
+unsigned long t_0_s1 = 0;
+
 /*General variables*/
 int id = 0;
 int debugSocket = 0;
