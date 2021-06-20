@@ -31,14 +31,36 @@ AccMessage getAccData(){
 }
 /********************************************************************************************************DHT22********************************************************************************************************************/
 
+int initDHT(){
+    dht.begin();
+    return SUCCESFULL;
+}
+
+
 HumidTemp getHumidTemp(){
 
   HumidTemp myReadings;
-  
-  dht.begin();
   myReadings.temperature = dht.readTemperature();
   myReadings.humidity = dht.readHumidity(); 
 
   return myReadings;
 
+}
+/********************************************************************************************************BH1750********************************************************************************************************************/
+
+int initBH1750(){
+  
+  r = lightMeter.begin();
+  if (r){
+    return SUCCESFULL;
+  } else {
+    return ERROR;
+  }
+
+}
+
+float getLuminosity(){
+  
+  return lightMeter.readLightLevel(); 
+ 
 }

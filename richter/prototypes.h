@@ -16,6 +16,7 @@
 #include <ArduinoOTA.h>
 #include <HTTPClient.h>
 #include <DHT.h>
+#include <BH1750.h>
 #include <ESPmDNS.h>
 #include <esp32fota.h>
 #include <esp_task_wdt.h> 
@@ -33,6 +34,7 @@
 
 /*Declaration*/
 WiFiClientSecure client2; 
+BH1750 lightMeter (0x23); 
 WiFiUDP udp;
 FS_File_Record ObjFS("/log.bin", 20);
 WiFiUDP ntpUDP; 
@@ -54,6 +56,11 @@ secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
 
 /*sensors.ino*/
 int initAccelerometer();
+AccMessage getAccData();
+int initDHT();
+HumidTemp getHumidTemp();
+int initBH1750();
+float getLuminosity();
 
 /*udp.ino*/
 void initUDP();
