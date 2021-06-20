@@ -1,3 +1,5 @@
+<img src="https://cdn.discordapp.com/attachments/764880223560794172/856189072800612382/readme.png">
+
 # Richter
 A Open Source project of an autonomous/controlled robot using ESP32.
 
