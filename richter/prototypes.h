@@ -15,6 +15,7 @@
 #include "ArduinoNvs.h"
 #include <ArduinoOTA.h>
 #include <HTTPClient.h>
+#include <DHT.h>
 #include <ESPmDNS.h>
 #include <esp32fota.h>
 #include <esp_task_wdt.h> 
@@ -27,7 +28,8 @@
 #include "FS_File_Record.h"  // Nossa lib personalizada do SPIFFS
 #include <lmic.h>
 #include <hal/hal.h>
-
+#include <Adafruit_Sensor.h>
+#include <Adafruit_ADXL345_U.h>
 
 /*Declaration*/
 WiFiClientSecure client2; 
@@ -40,6 +42,8 @@ PubSubClient MQTT(espClient);
 TaskHandle_t task_low_serial;
 TaskHandle_t task_low_led;
 TaskHandle_t task_low;
+DHT dht(dhtPin, dhtType);
+Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
 
 
 /*utils.ino*/
@@ -47,6 +51,9 @@ void vLow(void *pvParameters);
 void vLowSerial(void *pvParameters);
 void vLowLED(void *pvParameters);
 secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
+
+/*sensors.ino*/
+int initAccelerometer();
 
 /*udp.ino*/
 void initUDP();
@@ -79,5 +86,3 @@ int getDistanceFront();
 int getDistanceLeft();
 int getDistanceRight();
 int checkPerimeter();
-
-

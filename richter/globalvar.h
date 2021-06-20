@@ -96,6 +96,19 @@ int r = 0;
 unsigned long t_s1 = 0;
 unsigned long t_0_s1 = 0;
 
+/*Sensors*/
+struct AccMessage {
+  float xAxis;
+  float yAxis;
+  float zAxis;
+};
+
+struct HumidTemp {
+  float humidity;
+  float temperature;
+};
+
+
 /*Spiffs*/
 String errorMsg;
 

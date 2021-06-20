@@ -22,6 +22,10 @@
 #define pinRecharge      4
 #define RST 5
 
+/*Sensors*/
+#define dhtPin 4
+#define dhtType DHT22
+
 /*Cores*/
 #define CORE_0 0
 #define CORE_1 1
