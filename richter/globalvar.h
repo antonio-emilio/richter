@@ -96,6 +96,18 @@ int r = 0;
 unsigned long t_s1 = 0;
 unsigned long t_0_s1 = 0;
 
+/*GPS*/
+const double LATITUDE_REFERENCE = -22.129688;
+const double LONGITUDE_REFERENCE = -51.408570; 
+const double MAX_DISTANCE = 1000;
+const String CELLNUMBER = "+5518999999999"; 
+bool smsSent = false; 
+const int TIMEOUT_AT = 2000;
+const int RX_PIN = 0;
+const int TX_PIN = 22;
+const int pinLed = 17;
+const int BAUD_RATE = 115200;
+
 /*Sensors*/
 struct AccMessage {
   float xAxis;

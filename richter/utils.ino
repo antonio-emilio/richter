@@ -46,9 +46,10 @@ void initRichter(){
   /*Configure the sleep mode in case we need.*/
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   
-  /*Create tasks to control the serial communication and LEDS.*/
+  /*Create tasks to control the serial communication, timers and LEDS.*/
   xTaskCreatePinnedToCore(vLowSerial,"vLowSerial",8192,NULL,PRIORITY_2, &task_low_serial, CORE_0);
-  xTaskCreatePinnedToCore(vLowLED,"vLowLED",1024,NULL,PRIORITY_1,&task_low_led, CORE_1);
+  xTaskCreatePinnedToCore(vLowLED,"vLowLED",1024,NULL,PRIORITY_3,&task_low_led, CORE_1);
+  xTaskCreatePinnedToCore(vLowTimer,"vLowTimer",1024,NULL,PRIORITY_2,&task_timer, CORE_1);
 
   /*Configure PID functionalities*/
   myPID.SetMode(AUTOMATIC);
@@ -267,6 +268,16 @@ void vLowSerial(void *pvParameters) {
     }vTaskDelay(pdMS_TO_TICKS(100));}
     
 }
+
+/*Timer*/
+void vLowTimer(void *pvParameters) {
+  while (true) {
+    
+    vTaskDelay(pdMS_TO_TICKS(1000));}
+}
+
+
+
 
 /*Check for new updates*/
 void checkUpdates(){

@@ -31,6 +31,8 @@
 #include <hal/hal.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_ADXL345_U.h>
+#include <HardwareSerial.h> 
+#include "GPRS_Functions.h"
 
 /*Declaration*/
 WiFiClientSecure client2; 
@@ -44,14 +46,17 @@ PubSubClient MQTT(espClient);
 TaskHandle_t task_low_serial;
 TaskHandle_t task_low_led;
 TaskHandle_t task_low;
+TaskHandle_t task_timer;
 DHT dht(dhtPin, dhtType);
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
+HardwareSerial mySerial(1); 
 
 
 /*utils.ino*/
 void vLow(void *pvParameters);
 void vLowSerial(void *pvParameters);
-void vLowLED(void *pvParameters);
+void vLowLED(void *pvParameters); 
+void vLowTimer(void *pvParameters);
 secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
 
 /*sensors.ino*/
