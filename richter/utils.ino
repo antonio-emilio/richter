@@ -296,6 +296,8 @@ void vLowTelemetry(void *pvParameters) {
     pkt += "\"zAxisAcc\":" + String(accReading.zAxis) + "}}";
 
     sendUDPmsg(pkt);
+
+    checkUDPmsg();
     
     vTaskDelay(pdMS_TO_TICKS(500));}
 }
