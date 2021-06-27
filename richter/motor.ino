@@ -4,15 +4,12 @@ Control the left motor with binary commands (Full speed forward, full speed back
 */
 void LeftMotorBinary(String action){
   if (action.equals("FOWARD")){
-    socketPrint("Moving Forward");
     digitalWrite(motor1Pin1Left, LOW);
     digitalWrite(motor1Pin2Left, HIGH);
   } else if (action.equals("BACKWARD")){
-    socketPrint("Moving Backwards");
     digitalWrite(motor1Pin1Left, HIGH);
     digitalWrite(motor1Pin2Left, LOW); 
   } else {
-    socketPrint("Motor stopped");
     digitalWrite(motor1Pin1Left, LOW);
     digitalWrite(motor1Pin2Left, LOW);
   }
@@ -23,15 +20,12 @@ Control the right motor with binary commands (Full speed forward, full speed bac
 */
 void RightMotorBinary(String action){
   if (action.equals("FOWARD")){
-    socketPrint("Moving Forward");
     digitalWrite(motor2Pin1Right, LOW);
     digitalWrite(motor2Pin2Right, HIGH);
   } else if (action.equals("BACKWARD")){
-    socketPrint("Moving Backwards");
     digitalWrite(motor2Pin1Right, HIGH);
     digitalWrite(motor2Pin2Right, LOW); 
   } else {
-    socketPrint("Motor stopped");
     digitalWrite(motor2Pin1Right, LOW);
     digitalWrite(motor2Pin2Right, LOW);
   }
@@ -43,7 +37,6 @@ Control the left motor with PWM commands.
 */
 void LeftMotorPWM(String action, int dutyCycle, int delayTime){
   if (action.equals("FOWARD")){
-    Serial.print("Forward with duty cycle: ");
     digitalWrite(motor1Pin1Left, LOW);
     digitalWrite(motor1Pin2Left, HIGH);
     while (dutyCycle <= 255){
@@ -68,7 +61,6 @@ Control the right motor with PWM commands.
 */
 void RightMotorPWM(String action, int dutyCycle, int delayTime){
   if (action.equals("FOWARD")){
-    Serial.print("Forward with duty cycle: ");
     digitalWrite(motor2Pin1Right, LOW);
     digitalWrite(motor2Pin2Right, HIGH);
     while (dutyCycle <= 255){

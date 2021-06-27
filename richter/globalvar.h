@@ -120,6 +120,8 @@ struct HumidTemp {
   float temperature;
 };
 
+AccMessage accReading;
+HumidTemp dhtReading;
 
 /*Spiffs*/
 String errorMsg;
@@ -185,6 +187,9 @@ int avoidBack = 0;
 int avoidFront = 0;
 int avoidRight = 0;
 int avoidLeft = 0;
+
+/*Telemetry*/
+String pkt = "";
 
 /*Sleep mode*/
 int isCharging = 0;

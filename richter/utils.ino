@@ -50,6 +50,7 @@ void initRichter(){
   xTaskCreatePinnedToCore(vLowSerial,"vLowSerial",8192,NULL,PRIORITY_2, &task_low_serial, CORE_0);
   xTaskCreatePinnedToCore(vLowLED,"vLowLED",1024,NULL,PRIORITY_3,&task_low_led, CORE_1);
   xTaskCreatePinnedToCore(vLowTimer,"vLowTimer",1024,NULL,PRIORITY_2,&task_timer, CORE_1);
+  xTaskCreatePinnedToCore(vLowTelemetry,"vLowTelemetry",8192,NULL,PRIORITY_3, &task_low_telemetry, CORE_0);
 
   /*Configure PID functionalities*/
   myPID.SetMode(AUTOMATIC);
@@ -276,6 +277,28 @@ void vLowTimer(void *pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(1000));}
 }
 
+
+/*Telemetry*/
+void vLowTelemetry(void *pvParameters) {
+  /*Init the UDP connection*/
+  initUDP();
+
+  while (true) {
+    accReading = getAccData();
+    dhtReading = getHumidTemp();
+
+    pkt = "{\"service\":\"richter\",";
+    pkt += "\"tmstp\":\"" + String(millis()) + "\",";
+    pkt += "\"sensors\":{\"humidty\":" + String(dhtReading.humidity) + ",";
+    pkt += "\"temperature\":" + String(dhtReading.temperature) + ",";
+    pkt += "\"xAxisAcc\":" + String(accReading.xAxis) + ",";
+    pkt += "\"yAxisAcc\":" + String(accReading.yAxis) + ",";
+    pkt += "\"zAxisAcc\":" + String(accReading.zAxis) + "}}";
+
+    sendUDPmsg(pkt);
+    
+    vTaskDelay(pdMS_TO_TICKS(500));}
+}
 
 
 
