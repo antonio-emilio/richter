@@ -2,7 +2,8 @@
 
 # Richter
 A Open Source project of an autonomous/controlled robot using ESP32.
-Progress: [##........] 20%
+
+# Progress: [##........] 20%
 
 ### Motivation
 In february 2021, NASA launched Perseverance on the surface of Mars to kept looking for signs of past life on the red planet. 
