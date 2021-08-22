@@ -1,23 +1,42 @@
 
 /*Configure all pins.*/
 void configurePins(){
+  Serial.println("[GPIO] Starting to configure GPIOS.");
   pinMode(motor1Pin1Left, OUTPUT);
   pinMode(motor1Pin2Left, OUTPUT);
   pinMode(enable1Pin, OUTPUT);
   pinMode(motor2Pin1Right, OUTPUT);
   pinMode(motor2Pin2Right, OUTPUT);
   pinMode(enable2Pin, OUTPUT);
+
+  /*Configure LED PWM functionalitites*/
+  ledcSetup(pwmChannel, freq, resolution);
+  ledcSetup(pwmChannel2, freq, resolution);
+  
+  /*Attach the channel to the GPIO to be controlled*/
+  ledcAttachPin(enable1Pin, pwmChannel);
+  ledcAttachPin(enable2Pin, pwmChannel2);
+
+  Serial.println("[GPIO] GPIO's configured.");
+}
+
+/*Configure all tasks*/
+void configureTasks(){
+  Serial.println("[TASK] Starting to configure tasks.");
+  xTaskCreatePinnedToCore(vLowSerial,"vLowSerial",2048,NULL,PRIORITY_2, &task_low_serial, CORE_0);
+  xTaskCreatePinnedToCore(vLowLED,"vLowLED",1024,NULL,PRIORITY_1,&task_low_led, CORE_1);
+  xTaskCreatePinnedToCore(vLowTimer,"vLowTimer",1024,NULL,PRIORITY_4,&task_timer, CORE_1);
+  xTaskCreatePinnedToCore(vLowTelemetry,"vLowTelemetry",8192,NULL,PRIORITY_3, &task_low_telemetry, CORE_0);
+  Serial.println("[TASK] Tasks configured.");
 }
 
 /*Do all initial setups*/
 void initRichter(){
 
-  /*Init the watchdog interface.*/
-  esp_task_wdt_init(8, true);
-  esp_task_wdt_add(NULL);
-
   /*Init serial.*/
   init_serial();
+
+  Serial.println("[BOOT] Starting to load configurations.");
 
   /*Init non vollatile memory*/
   NVS.begin(); 
@@ -32,56 +51,33 @@ void initRichter(){
   SPI.begin(18, 19, 23, SS); 
 
   /*Configure I2C*/
-  Wire.begin(); 
-  i2cdetect();       
-  
-  /*Configure LED PWM functionalitites*/
-  ledcSetup(pwmChannel, freq, resolution);
-  ledcSetup(pwmChannel2, freq, resolution);
-  
-  /*Attach the channel to the GPIO to be controlled*/
-  ledcAttachPin(enable1Pin, pwmChannel);
-  ledcAttachPin(enable2Pin, pwmChannel2);
+  Wire.begin();     
 
   /*Configure the sleep mode in case we need.*/
+  Serial.println("[BOOT] Configuring sleep mode.");
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  Serial.println("[BOOT] Sleep mode configured.");
   
-  /*Create tasks to control the serial communication, timers and LEDS.*/
-  xTaskCreatePinnedToCore(vLowSerial,"vLowSerial",8192,NULL,PRIORITY_2, &task_low_serial, CORE_0);
-  xTaskCreatePinnedToCore(vLowLED,"vLowLED",1024,NULL,PRIORITY_3,&task_low_led, CORE_1);
-  xTaskCreatePinnedToCore(vLowTimer,"vLowTimer",1024,NULL,PRIORITY_2,&task_timer, CORE_1);
-  xTaskCreatePinnedToCore(vLowTelemetry,"vLowTelemetry",8192,NULL,PRIORITY_3, &task_low_telemetry, CORE_0);
-
   /*Configure PID functionalities*/
+  Serial.println("[PID] Configuring PID.");
   myPID.SetMode(AUTOMATIC);
+  Serial.println("[PID] PID configured.");
 
   /*Init wifi*/
   init_wifi();
 
-  /*Starts socket connection*/
-  if (!client.connect("yourServer", 1883)) {
-    Serial.println("Socket connection has failed.");
-    return;
-  }
-
-  /*Init MQTT*/
-  init_mqtt();
-  
-  /*Init ESP-NOW*/
-  if (esp_now_init() != ESP_OK) {
-    socketPrint("Error initializing ESP-NOW");
-    return;
-  }
-
-  /*Make all configs to use ESP-NOW*/
-  configESPNOW();
-
   /*Interrupts*/
   attachInterrupt(pinRecharge, rechargebleISR, RISING); 
 
+  /*Tasks*/
+  configureTasks();
+
   /*Publish a topic to tell he's alive.*/
-  MQTT.publish(TOPICO_PUBLISH, "Richter has been initialized successfully.");
-  socketPrint("Richter has been initialized successfully.");
+  Serial.println("[BOOT] Richter has been initialized successfully.");
+
+  /*Init the watchdog interface.*/
+  esp_task_wdt_init(8, true);
+  esp_task_wdt_add(NULL);
 
 }
 
@@ -99,9 +95,8 @@ Init the wifi.
 */ 
 void init_wifi(void) 
 {
-    vTaskDelay(pdMS_TO_TICKS(100));
-    Serial.print("Trying to connect with: ");
-    reconnect_wifi();
+    Serial.println("[WIFI] Trying to connect to WiFi network.");
+    r = reconnect_wifi();
 }
 
 /*
@@ -125,7 +120,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length)
        char c = (char)payload[i];
        msg += c;
     }
-    Serial.print("[MQTT] Received message: ");
+    Serial.println("[MQTT] Received message: ");
     Serial.println(msg);     
 }
 
@@ -136,17 +131,17 @@ void reconnect_mqtt(void)
 {
     while (!MQTT.connected()) 
     {
-        Serial.print("Trying to connect with broker ");
+        Serial.println("[MQTT] Trying to connect with broker ");
         Serial.println(BROKER_MQTT);
         if (MQTT.connect(ID_MQTT)) 
         {
-            Serial.println("Connected successfully with broker!");
+            Serial.println("[MQTT] Connected successfully with broker!");
             MQTT.subscribe(TOPICO_SUBSCRIBE); 
         } 
         else
         {
-            Serial.println("Failed to connect on broker.");
-            Serial.println("There will be a new attempt in 2 seconds.");
+            Serial.println("[MQTT] Failed to connect on broker.");
+            Serial.println("[MQTT] There will be a new attempt in 2 seconds.");
             vTaskDelay(pdMS_TO_TICKS(2000));
         }
     }
@@ -155,38 +150,25 @@ void reconnect_mqtt(void)
 /*
 Check if wifi connection is ok. If not, try to reconnect.
 */  
-void reconnect_wifi() 
+int reconnect_wifi() 
 {
     if (WiFi.status() == WL_CONNECTED)
-        return;
+        return SUCCESFULL;
 
-    WiFi.mode( WIFI_AP_STA );
-    WiFi.begin(ssidRouter,passwordRouter); 
-
-    Serial.println("[WIFI] Trying to connect to wifi network");
-
-    /*Enables station mode*/
-    WiFi.mode( WIFI_STA );
-    while (WiFi.status() != WL_CONNECTED) 
-    {
+    WiFi.begin(ssid, password);
+ 
+    while (WiFi.status() != WL_CONNECTED && timeoutWifi) {
+      timeoutWifi--;
       delay(500);
-      Serial.print(".");
     }
-   
-    j = esp_wifi_set_protocol( WIFI_IF_STA, WIFI_PROTOCOL_LR );
-    if (j == SUCCESFULL)
-    {
-      Serial.println("[WIFI] LR mode enabled.");
-    }
-    else
-    {
-      Serial.println("[WIFI] LR mode could not be enabled.");
-    }
-      
-    WiFi.begin(ssid, password);//this ssid is not visible
 
-    Serial.println("[WIFI] WiFi connected");
-    Serial.print("[WIFI] IP address: ");
+    if (WiFi.status() != WL_CONNECTED){
+      Serial.println("[WIFI] Failed to connect to wifi network");
+      return ERROR;
+    }
+
+    Serial.println("[WIFI] Connected to the WiFi network");
+    Serial.println("[WIFI] IP address: ");
     Serial.println(WiFi.localIP());
 
 }
@@ -209,7 +191,9 @@ int checkConnections(void)
 
 /*Values from NVS*/
 void getValuesFromNVS(){
+  Serial.println("[NVS] Getting data from NVS.");
   id = NVS.getInt("id");  /*Unique identifies of the robot*/
+  Serial.println("[NVS] Data collected.");
 }
 
 /*Socket - Serial*/
@@ -222,35 +206,17 @@ void socketPrint(String cmd){
 
 /*Tasks - LED*/
 void vLowLED(void *pvParameters) {
-  const int freq = 5000;
-  const int ledChannel = 0;
-  const int resolution = 8;
-  const int ledChannel2 = 1;
 
-  ledcSetup(ledChannel, freq, resolution);
-  ledcAttachPin(ledPin, ledChannel);
-  ledcSetup(ledChannel2, freq, resolution);
-  ledcAttachPin(ledPin2, ledChannel2);
-
-  
   while (true) {
 
-    /*Oscilates the led.*/
-    if (estado == WORKING){
-      for(int i = 0; i< 255; i++){
-        ledcWrite(ledChannel, i);
-        vTaskDelay(pdMS_TO_TICKS(5));
-      }
+    switch (estado){
+      case WORKING:
 
-      for(int i = 255; i> 0; i--){
-        ledcWrite(ledChannel, i);
-        vTaskDelay(pdMS_TO_TICKS(5));
-      }
-    } else {
-      vTaskDelay(pdMS_TO_TICKS(100));
+      break;
+    vTaskDelay(pdMS_TO_TICKS(100));
+    }
     }
   }
-}
 
 /*Tasks*/
 void vLowSerial(void *pvParameters) {
@@ -273,17 +239,18 @@ void vLowSerial(void *pvParameters) {
 /*Timer*/
 void vLowTimer(void *pvParameters) {
   while (true) {
-    
+    Serial.println("[TIMER_1S] Finished execution.");
     vTaskDelay(pdMS_TO_TICKS(1000));}
 }
 
 
 /*Telemetry*/
 void vLowTelemetry(void *pvParameters) {
-  /*Init the UDP connection*/
-  initUDP();
 
   while (true) {
+
+    reconnect_wifi();
+
     accReading = getAccData();
     dhtReading = getHumidTemp();
 
@@ -294,12 +261,9 @@ void vLowTelemetry(void *pvParameters) {
     pkt += "\"xAxisAcc\":" + String(accReading.xAxis) + ",";
     pkt += "\"yAxisAcc\":" + String(accReading.yAxis) + ",";
     pkt += "\"zAxisAcc\":" + String(accReading.zAxis) + "}}";
-
-    sendUDPmsg(pkt);
-
-    checkUDPmsg();
+    Serial.println("[PACKET] " + pkt);
     
-    vTaskDelay(pdMS_TO_TICKS(500));}
+    vTaskDelay(pdMS_TO_TICKS(15000));}
 }
 
 

@@ -7,10 +7,10 @@ void sendMessageESPNOW(String msg, bool batteryLevel){
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
    
   if (result == ESP_OK) {
-    socketPrint("Sent with success");
+    Serial.print("Sent with success");
   }
   else {
-    socketPrint("Error sending the data");
+    Serial.print("Error sending the data");
   }
 }
 
@@ -18,17 +18,17 @@ void sendMessageESPNOW(String msg, bool batteryLevel){
 /*ESP-NOW*/
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.print("Last Packet Send Status:");
-  socketPrint(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+  Serial.print(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   Serial.print("Bytes received: ");
-  socketPrint(String(len));
+  Serial.print(String(len));
   Serial.print("cmd: ");
-  socketPrint(myData.cmd);
+  Serial.print(myData.cmd);
   Serial.print("batteryLow: ");
-  socketPrint(String(myData.isBatteryLow));
-  socketPrint("");
+  Serial.print(String(myData.isBatteryLow));
+  Serial.print("");
 }
 
 /*Configure the espnow interface.*/
@@ -44,7 +44,7 @@ int configESPNOW(){
 
   /*Add peer*/
   if (esp_now_add_peer(&peerInfo) != ESP_OK){
-    socketPrint("Failed to add peer");
+    Serial.print("Failed to add peer");
     return ERROR;
   }
 

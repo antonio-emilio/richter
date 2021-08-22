@@ -131,6 +131,7 @@ const char* ssid = "richter";//AP ssid
 const char* password = "richter@123robot";//AP password
 const char* ssidRouter = "xxxx";//STA router ssid
 const char* passwordRouter = "xxxxxx";//STA router password
+int timeoutWifi = 5;
 
 /*UDP Connection*/
 int packetSize = 0;

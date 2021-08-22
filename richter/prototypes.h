@@ -59,6 +59,7 @@ void vLowSerial(void *pvParameters);
 void vLowLED(void *pvParameters); 
 void vLowTimer(void *pvParameters);
 void vLowTelemetry(void *pvParameters);
+void configureTasks();
 secureEsp32FOTA secureEsp32FOTA("esp32-fota-https", V_FIRMWARE);
 
 /*sensors.ino*/
@@ -84,7 +85,7 @@ WiFiClient client;
 void init_serial(void);
 void init_wifi(void);
 void init_mqtt(void);
-void reconnect_wifi(void); 
+int reconnect_wifi(void); 
 void mqtt_callback(char* topic, byte* payload, unsigned int length);
 int checkConnections(void);
 
